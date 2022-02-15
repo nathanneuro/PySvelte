@@ -1,6 +1,6 @@
 # PySvelte
 
-**THIS LIBRARY IS TOTALLY UNSUPPORTED. IT IS PROVIDED AS IS, AS AN EXAMPLE OF ONE WAY TO SOLVE A PROBLEM. MANY FEATURES WILL NOT WORK WITHOUT YOU WRITING YOUR OWN `config.py` FILE.**
+# Unofficial fork of Anthropic's PySvelte for continuous production and support 
 
 If we want to understand neural networks, it's essential that we have effective ways of getting lots of information from the innards of those models into a readable form. Often, this will be a data visualization.
 
@@ -11,6 +11,12 @@ This library is an attempt at bridging these ecosystems. It encourages a very op
 * To encourage visualizations to be modular and reusable.
 * To make it easy to publish persistent visualizations to standalone, sharable pages.
 * To allow researchers who don't know anything about web technologies to use visualizations their colleagues create.
+
+## Install
+Install via 
+```sh
+pip install -e .
+```
 
 ## Set Up
 
