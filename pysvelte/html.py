@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import Optional
 
 from .javascript import get_script_tags
@@ -40,6 +41,7 @@ class Html:
         description=None,
         script_paths=None,
         extra_head_content="",
+        suppress_title=False,
     ):
         html = html or []
         script_paths = script_paths or []
@@ -54,7 +56,8 @@ class Html:
         elif isinstance(html, Html):
             self.chunks = html.chunks
             self.script_paths = html.script_paths
-            self.title = title or html.title
+            if not suppress_title:
+                self.title = title or html.title
             self.description = description or html.description
         elif isinstance_noimport(html, "plotly.graph_objs._figure.Figure"):
             self.title = title or html.layout.title.text
@@ -144,7 +147,7 @@ class Html:
     def __radd__(self, x) -> "Html":
         return Html._add_util(x, self)
 
-    def update_meta(self, title=None, description=None):
+    def update_meta(self, title=None, description=None, suppress_title=False):
         """
         Provide a new title and description
         """
@@ -153,6 +156,7 @@ class Html:
             title=title,
             description=description,
             extra_head_content=self.extra_head_content,
+            suppress_title=suppress_title,
         )
 
     def publish(
@@ -165,11 +169,16 @@ class Html:
         title=None,
         description=None,
         update_index=True,
+        suppress_title=False,
     ) -> str:
         """
         Publish a piece of html. See Publisher.publish_html.
         """
-        out = self.update_meta(title=title, description=description)
+        out = self.update_meta(
+            title=title, 
+            description=description,
+            suppress_title=suppress_title,
+        )
         return get_publisher().publish_html(
             out,
             path=path,
