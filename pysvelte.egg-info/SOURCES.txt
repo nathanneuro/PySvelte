@@ -12,4 +12,5 @@ pysvelte/vis_paths.py
 pysvelte.egg-info/PKG-INFO
 pysvelte.egg-info/SOURCES.txt
 pysvelte.egg-info/dependency_links.txt
+pysvelte.egg-info/requires.txt
 pysvelte.egg-info/top_level.txt

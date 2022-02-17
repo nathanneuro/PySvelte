@@ -5,7 +5,7 @@ Summary: UNKNOWN
 Home-page: UNKNOWN
 License: UNKNOWN
 Platform: UNKNOWN
-Requires: typeguard
+Requires-Python: >=3.9.0
 License-File: LICENSE
 
 UNKNOWN
