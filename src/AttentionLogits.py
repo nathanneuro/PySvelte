@@ -7,16 +7,9 @@ Tensor = Union[np.ndarray, torch.Tensor]
 
 
 def init(
-    tokens: List[str], attention: Tensor, info_weighted: Tensor = None, head_labels=None
+    tokens: List[str], attention: Tensor, logits: Tensor, head_labels=None
 ):
-    """Visualize the attention patterns for multiple attention heads.
-
-    This component is used to visualize attention patterns from a
-    Transformer self-attention module. A version of this component was
-    used to generate the attention explorer seen here:
-    https://transformer-circuits.pub/2021/framework/2L_HP_normal.html
-    and linked from our paper:
-    https://transformer-circuits.pub/2021/framework/index.html
+    """Visualize the attention patterns and logit attribution for multiple attention heads.
 
     Args:
       tokens: a list of strings representing tokens
@@ -25,11 +18,6 @@ def init(
         (or analogous value like number of NMF factors).
 
         Attention weights are expected to be in [0, 1].
-
-      info_weighted: (optional) A [N, N, H] array represented
-        re-weighted attention patterns. If provided, the component
-        will allow toggling between this pattern and the standard
-        pattern.
 
       head_labels: human readable labels for heads. Optional.
 
@@ -41,12 +29,15 @@ def init(
         attention.shape[0] == attention.shape[1]
     ), "first two dimensions of attention must be equal"
     assert attention.ndim == 3, "attention must be 3D"
+    assert (
+        len(tokens) == logits.shape[0]
+    ), "tokens and logits must be same length"
+    assert (
+        logits.shape[0] == logits.shape[1]
+    ), "first two dimensions of logits must be equal"
+    assert logits.ndim == 3, "logits must be 3D"
     if head_labels is not None:
         assert (
             len(head_labels) == attention.shape[-1]
         ), "head_labels must correspond to number of attention heads"
-    if info_weighted is not None:
-        assert (
-            attention.shape == info_weighted.shape
-        ), "info_weighted must be the same shape as attention"
     return
