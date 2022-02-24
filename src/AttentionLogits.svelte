@@ -6,7 +6,8 @@
     // Pass in values for these
     export let tokens;
     export let attention; // the original/input. the one to use/display should be attention_show (below)
-    export let logits;
+    export let pos_logits;
+    export let neg_logits;
     export let head_labels;
     export let show_tokens = true;
     // export let blank_color = "#FFF";
@@ -28,6 +29,7 @@
     $: window.attention_show = attention_show;
 
     export let _show_logits = false;
+    export let _show_neg_logits = false;
 
     function range(n) {
         return [...Array(n).keys()];
@@ -73,8 +75,11 @@
     $: attention_reduce_dst = reduce_Y(attention);
     $: attention_reduce_src = reduce_X(attention);
     
-    $: logits_reduce_dst = reduce_Y(logits);
-    $: logits_reduce_src = reduce_X(logits);
+    $: pos_logits_reduce_dst = reduce_Y(pos_logits);
+    $: pos_logits_reduce_src = reduce_X(pos_logits);
+    
+    $: neg_logits_reduce_dst = reduce_Y(neg_logits);
+    $: neg_logits_reduce_src = reduce_X(neg_logits);
 
 
     $: N_heads = attention.shape[2];
@@ -139,7 +144,8 @@
     }
 
     export let all_attn_token_colors;
-    export let all_logits_token_colors;
+    export let all_pos_logits_token_colors;
+    export let all_neg_logits_token_colors;
 
     $: all_attn_token_colors = range(tokens.length).map(
         i => token_color(
@@ -151,17 +157,26 @@
                         attention_reduce_src,
                         attention_reduce_dst
                     ));
-    $: all_logits_token_colors = range(tokens.length).map(
+    $: all_pos_logits_token_colors = range(tokens.length).map(
         i => token_color(
-                        logits,
+                        pos_logits,
                         focus_token,
                         i,
                         focus_head,
                         hover_token_is_target,
-                        logits_reduce_src,
-                        logits_reduce_dst
+                        pos_logits_reduce_src,
+                        pos_logits_reduce_dst
                     ));
-
+    $: all_neg_logits_token_colors = range(tokens.length).map(
+        i => token_color(
+                        neg_logits,
+                        focus_token,
+                        i,
+                        focus_head,
+                        hover_token_is_target,
+                        neg_logits_reduce_src,
+                        neg_logits_reduce_dst
+                    ));
 </script>
 
 <div class="attn-container">
@@ -172,15 +187,29 @@
         {/if}
     </div>
     {#if _show_logits}
-        <div style="grid-column: big-attn; grid-row: main;">
-            <ArrayImage
-                array={logits}
+        {#if _show_neg_logits}
+            <div style="grid-column: big-attn; grid-row: main;">
+                <ArrayImage
+                array={neg_logits}
                 width="200"
                 height="200"
                 {focus_token}
                 isolate_channel={focus_head}
-            />
-        </div>
+                />
+            </div>
+        {:else}
+        
+            <div style="grid-column: big-attn; grid-row: main;">
+                <ArrayImage
+                array={pos_logits}
+                width="200"
+                height="200"
+                {focus_token}
+                isolate_channel={focus_head}
+                />
+            </div>
+        
+        {/if}
     {:else}
         <div style="grid-column: big-attn; grid-row: main;">
         <ArrayImage
@@ -203,28 +232,53 @@
                     set_value={head_i}
                 >
                     {#if _show_logits}
-                        <div
-                            class="head-icon"
-                            style="opacity: {focus_head != undefined &&
-                            focus_head != head_i
-                                ? '0.2'
-                                : head_intensity(head_i, focus_token, hover_token_is_target, logits_reduce_src, logits_reduce_dst)};"
-                        >
-                            <ArrayImage
-                                array={logits}
-                                width="60"
-                                height="60"
-                                isolate_channel={head_i}
-                            />
+                        {#if _show_neg_logits}
                             <div
-                                class="head-label"
-                                style="background: {colors[head_i]}"
+                                class="head-icon"
+                                style="opacity: {focus_head != undefined &&
+                                focus_head != head_i
+                                    ? '0.2'
+                                    : head_intensity(head_i, focus_token, hover_token_is_target, neg_logits_reduce_src, neg_logits_reduce_dst)};"
                             >
-                                {@html head_labels_[head_i] != undefined
-                                    ? head_labels_[head_i]
-                                    : "&nbsp"}
+                                <ArrayImage
+                                    array={neg_logits}
+                                    width="60"
+                                    height="60"
+                                    isolate_channel={head_i}
+                                />
+                                <div
+                                    class="head-label"
+                                    style="background: {colors[head_i]}"
+                                >
+                                    {@html head_labels_[head_i] != undefined
+                                        ? head_labels_[head_i]
+                                        : "&nbsp"}
+                                </div>
                             </div>
-                        </div>
+                        {:else}
+                            <div
+                                class="head-icon"
+                                style="opacity: {focus_head != undefined &&
+                                focus_head != head_i
+                                    ? '0.2'
+                                    : head_intensity(head_i, focus_token, hover_token_is_target, pos_logits_reduce_src, pos_logits_reduce_dst)};"
+                            >
+                                <ArrayImage
+                                    array={pos_logits}
+                                    width="60"
+                                    height="60"
+                                    isolate_channel={head_i}
+                                />
+                                <div
+                                    class="head-label"
+                                    style="background: {colors[head_i]}"
+                                >
+                                    {@html head_labels_[head_i] != undefined
+                                        ? head_labels_[head_i]
+                                        : "&nbsp"}
+                                </div>
+                            </div>
+                        {/if}
                     {:else}
                         <div
                             class="head-icon"
@@ -271,7 +325,7 @@
                                  set_value={tok_i}
                                  style='display: inline'><span
                     class="token {tok_i == focus_token ? 'selected' : ''}"
-                    style="background: {_show_logits ? all_logits_token_colors[tok_i] : all_attn_token_colors[tok_i]};"
+                    style="background: {_show_logits ? (_show_neg_logits ? all_neg_logits_token_colors[tok_i] : all_pos_logits_token_colors[tok_i]) : all_attn_token_colors[tok_i]};"
                 >{tok}</span></LockableValueToggle>
         {/each}
     </div>
@@ -288,6 +342,14 @@
               on:click={() => (_show_logits = (_show_logits ^ true))}>
             Displaying
             <b>{_show_logits ? "Logit attribution" : "Attention"}</b></span>
+        {#if _show_logits}
+            <input class="hover-mode" type="checkbox" bind:checked={_show_neg_logits}/>
+            <span class="hover-mode-text"
+                style="white-space: nowrap;"
+                on:click={() => (_show_neg_logits = (_show_neg_logits ^ true))}>
+                Showing
+                <b>{_show_neg_logits ? "negative contribution" : "positive contribution"}</b></span>
+        {/if}
     </nobr></div>
 </div>
 {/if}
