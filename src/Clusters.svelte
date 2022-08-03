@@ -307,11 +307,29 @@
 
             </tr>
         {/each}
+
         <td>model output</td>
         {#each current_tokens as token_dict, token_dict_i}
             <td></td>
             <td>output_token:{token_dict['output_token']}</td>
         {/each}
+        <tr>
+        <td> Top Clusters for input token</td>
+        </tr>
+        <tr>
+        <td></td>
+        {#each current_tokens as token_dict, token_dict_i}
+        <td>
+            Clusters for {token_dict['input_token']}
+        </td>
+            {#each token_dict['sorted_clusters'] as cluster, cluster_i} 
+                <tr>
+                    <td>{cluster[0]}</td>
+                    <td>{cluster[1]}</td>
+                </tr>
+            {/each}
+        {/each}
+    </tr>
     </tbody>
     </table>
     
@@ -331,30 +349,6 @@
                     class="token {tok_i == focus_token ? 'selected' : ''}"
                     >{tok}</span>
                 {/each}
-            </div>
-            <div class="top_clusters">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>
-                                Top Clusters for token {focus_token}
-                            </th>
-                        </tr>
-                    </thead>
-                
-                <tbody>
-                
-                    {#each selected_clusters as cluster, cluster_i} 
-                    <tr>
-            
-                        <td>{cluster[0]}</td>
-                        <td>{cluster[3]}</td>
-                    </tr>
-                        {/each}
-                </tbody>
-                    
-
-
             </div>
 
             <div style="grid-column: left;">
